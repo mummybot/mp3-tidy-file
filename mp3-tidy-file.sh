@@ -65,14 +65,15 @@ function manageHyphensAndNumbering() {
     # http://regexpal.com/
     # Test data:
         # 01 - Uptown’s First Finale (feat. Stevie Wonder & Andrew Wyatt).mp3
+        # 01 - - Uptown’s First Finale (feat. Stevie Wonder & Andrew Wyatt).mp3
         # 01-Uptown’s First Finale (feat. Stevie Wonder & Andrew Wyatt).mp3
         # 01 Uptown’s First Finale (feat. Stevie Wonder & Andrew Wyatt).mp3
         # - 01 Uptown’s First Finale (feat. Stevie Wonder & Andrew Wyatt).mp3
-        # - 01 Uptown’s First Finale (feat. Stevie Wonder & Andrew Wyatt).mp3
+        #  - 01 Uptown’s First Finale (feat. Stevie Wonder & Andrew Wyatt).mp3
         # Mark Ronson - 01 - Uptown’s First Finale (feat. Stevie Wonder & Andrew Wyatt).mp3
         # Mark Ronson-01-Uptown’s First Finale (feat. Stevie Wonder & Andrew Wyatt).mp3
         # Mark Ronson- 01 -Uptown’s First Finale (feat. Stevie Wonder & Andrew Wyatt).mp3
-    newfilename=$(echo "$newfilename" | sed -E "s/[\s]*-*\s*([0-9][0-9]+)\s*-*\s*/ - \1 - /g")
+    newfilename=$(echo "$newfilename" | sed -E "s/[\s]*-*\s*([0-9][0-9]+)\s*-*\s*-*\s*/ - \1 - /")
 }
 
 # Remove artist name in case it is already there. 
@@ -85,7 +86,7 @@ function addArtistName() {
     newfilename="${artist}${newfilename}"
 }
 
-function replaceFeat() {
+function replaceFeaturing() {
     # Stupid mac regex can not be set to case insensitive
     # Commmon feat usage
     newfilename=$(echo "$newfilename" | sed "s/feat/ft/g")
@@ -102,8 +103,13 @@ function replaceFeat() {
     fi
 }
 
-function cleanUpDoubleWhiteSpace() {
+function cleanUpDoubles() {
+    # double or more hyphens
+    newfilename=$(echo "$newfilename" | sed -E "s/[-]+/-/g")
+    # double or more white space
     newfilename=$(echo "$newfilename" | sed -E "s/[ ]+/ /g")
+    #double space & hypens
+    newfilename=$(echo "$newfilename" | sed -E "s/[ -]+[ -]+/ - /g")
 }
 
 function getMp3sAndRunMethods() {
@@ -116,8 +122,8 @@ function getMp3sAndRunMethods() {
         manageHyphensAndNumbering
         removeArtistName
         addArtistName
-        replaceFeat
-        cleanUpDoubleWhiteSpace
+        replaceFeaturing
+        cleanUpDoubles
 
         # Check if in dry run mode
         if [[ $run != 1 ]]; then

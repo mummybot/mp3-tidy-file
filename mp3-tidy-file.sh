@@ -44,17 +44,6 @@ shift $((OPTIND-1))
 
 [ "$1" = "--" ] && shift
 
-function dirnametofilename() {
-  for f in $*; do
-    bn=$(basename "$f")
-    ext="${bn##*.}"
-    filepath=$(dirname "$f")
-    dirname=$(basename "$filepath")
-    mv "$f" "$filepath/$dirname $fn.$ext"
-    echo $f
-  done
-}
-
 function setArtistAlbumName() {
     local ary
 
@@ -87,7 +76,7 @@ function manageHyphensAndNumbering() {
 }
 
 # Remove artist name in case it is already there. 
-# We will add it later and this prevents duplicates.
+# We will add it later - this prevents duplicates.
 function removeArtistName() {
     newfilename=$(echo "$newfilename" | sed "s/$artist//g")
 }
@@ -117,6 +106,17 @@ function cleanUpDoubleWhiteSpace() {
     newfilename=$(echo "$newfilename" | sed -E "s/[ ]+/ /g")
 }
 
+function dirnametofilename() {
+  for f in $*; do
+    bn=$(basename "$f")
+    ext="${bn##*.}"
+    filepath=$(dirname "$f")
+    dirname=$(basename "$filepath")
+    mv "$f" "$filepath/$dirname $fn.$ext"
+    echo $f
+  done
+}
+
 function getMp3sAndRunMethods() {
     while IFS= read -d $'\0' -r file ; do
         oldfilename=$(basename "$file")
@@ -135,13 +135,17 @@ function getMp3sAndRunMethods() {
             printf "\"$oldfilename\" to \n\"$newfilename\"\n\n"
         # In run mode
         else
-            printf 'New file name: %s\n' "$newfilename"
+            # printf 'New file name: %s\n' "$newfilename"
+            echo "$file ||  $path/$newfilename"
+            echo "mv \"$oldfilename\" \"$newfilename\""
+            mv "$file" "$path/$newfilename"
+            echo "===================="
         fi
     done < <(find "$path" -iname '*.mp3' -print0)
 
     # Check if in dry run mode
     if [[ $run != 1 ]]; then
-        echo "If the this looks good run command with -r switch."
+        echo "If the conversion looks good run command with -r switch."
     # In run mode
     else
         echo "Renaming complete."

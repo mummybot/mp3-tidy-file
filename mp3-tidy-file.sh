@@ -66,16 +66,34 @@ function setArtistAlbumName() {
     echo "Album: " $album
 }
 
-function addartistname() {
-    newfilename="${artist} ${newfilename}"
-}
-
 function cleanUpLeadingDir() {
     newfilename="${newfilename/.\//}"
 }
 
-function contractHyphens() {
-    newfilename=
+function manageHyphensAndNumbering() {
+    # Hyphens
+    newfilename=$(echo "$newfilename" | sed -E "s/ - /-/g")
+    # http://regexpal.com/
+    # Test data:
+        # 01 - Uptown’s First Finale (feat. Stevie Wonder & Andrew Wyatt).mp3
+        # 01-Uptown’s First Finale (feat. Stevie Wonder & Andrew Wyatt).mp3
+        # 01 Uptown’s First Finale (feat. Stevie Wonder & Andrew Wyatt).mp3
+        # - 01 Uptown’s First Finale (feat. Stevie Wonder & Andrew Wyatt).mp3
+        # - 01 Uptown’s First Finale (feat. Stevie Wonder & Andrew Wyatt).mp3
+        # Mark Ronson - 01 - Uptown’s First Finale (feat. Stevie Wonder & Andrew Wyatt).mp3
+        # Mark Ronson-01-Uptown’s First Finale (feat. Stevie Wonder & Andrew Wyatt).mp3
+        # Mark Ronson- 01 -Uptown’s First Finale (feat. Stevie Wonder & Andrew Wyatt).mp3
+    newfilename=$(echo "$newfilename" | sed -E "s/[\s]*-*\s*([0-9][0-9]+)\s*-*\s*/ - \1 - /g")
+}
+
+# Remove artist name in case it is already there. 
+# We will add it later and this prevents duplicates.
+function removeArtistName() {
+    newfilename=$(echo "$newfilename" | sed "s/$artist//g")
+}
+
+function addArtistName() {
+    newfilename="${artist}${newfilename}"
 }
 
 function replaceFeat() {
@@ -95,15 +113,22 @@ function replaceFeat() {
     fi
 }
 
+function cleanUpDoubleWhiteSpace() {
+    newfilename=$(echo "$newfilename" | sed -E "s/[ ]+/ /g")
+}
+
 function getMp3sAndRunMethods() {
     while IFS= read -d $'\0' -r file ; do
         oldfilename=$(basename "$file")
         newfilename="${oldfilename}"
 
         # Run the functions
-        addartistname
         cleanUpLeadingDir
+        manageHyphensAndNumbering
+        removeArtistName
+        addArtistName
         replaceFeat
+        cleanUpDoubleWhiteSpace
 
         # Check if in dry run mode
         if [[ $run != 1 ]]; then

@@ -1,5 +1,3 @@
-# /Artist name/Album name/Artist Name - ## - Track name.mp3
-
 #!/bin/sh
 
 # A POSIX variable

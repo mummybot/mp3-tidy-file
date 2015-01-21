@@ -21,7 +21,7 @@ Examples:
 
 '
 run=0
-path=${PWD}
+path="${PWD}"
 artist=""
 album=""
 oldfilename=""
@@ -104,17 +104,6 @@ function replaceFeat() {
 
 function cleanUpDoubleWhiteSpace() {
     newfilename=$(echo "$newfilename" | sed -E "s/[ ]+/ /g")
-}
-
-function dirnametofilename() {
-  for f in $*; do
-    bn=$(basename "$f")
-    ext="${bn##*.}"
-    filepath=$(dirname "$f")
-    dirname=$(basename "$filepath")
-    mv "$f" "$filepath/$dirname $fn.$ext"
-    echo $f
-  done
 }
 
 function getMp3sAndRunMethods() {

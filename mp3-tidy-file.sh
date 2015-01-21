@@ -135,7 +135,8 @@ function getMp3sAndRunMethods() {
             printf "\"$oldfilename\" to \n\"$newfilename\"\n\n"
         # In run mode
         else
-            mv "$file" "$path/$newfilename"
+            mv "$file" "$path/$newfilename" && printf  "\"$newfilename\" successfully renamed.\n\n"
+
         fi
     done < <(find "$path" -iname '*.mp3' -print0)
 

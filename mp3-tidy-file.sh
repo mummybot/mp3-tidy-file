@@ -4,22 +4,23 @@
 OPTIND=1         # Reset in case getopts has been used previously in the shell.
 
 # Initialise variables
-helpText='
-Command line options:
-    -r          Rename mp3 files.
-    -p          The directory path of the mp3 files to be tidied.
-                By default it will use the location of this script.
-                Should point to ./Genre/Artist/Album/%FILES_TO_TIDY%
-    -h          Print this help menu
+function showHelp() {
+echo "Command line options:"
+echo "-r          Rename mp3 files."
+echo "-p          The directory path of the mp3 files to be tidied."
+echo "            By default it will use the location of this script."
+echo "            Should point to ./Genre/Artist/Album/%FILES_TO_TIDY%"
+echo "-h          Print this help menu"
+echo ""
+echo "Examples:"
+echo "    Dry run all mp3s in this directory"
+echo "        .mp3-tidy-file.sh -p ./Electronica/Mark\ Ronson/Uptown\ Special"
+echo ""
+echo "    Tidy all mp3s in this directory"
+echo "        .mp3-tidy-file.sh -r -p ./Electronica/Mark\ Ronson/Uptown\ Special"
 
-Examples:
-    Dry run all mp3s in this directory
-        .mp3-tidy-file.sh -p ./Electronica/Mark\ Ronson/Uptown\ Special
 
-    Tidy all mp3s in this directory
-        .mp3-tidy-file.sh -r -p ./Electronica/Mark\ Ronson/Uptown\ Special
-
-'
+}
 run=0
 path="${PWD}"
 artist=""
@@ -30,7 +31,7 @@ newfilename=""
 while getopts "h?rp:" opt; do
     case "$opt" in
     h|\?)
-        helpText
+        showHelp
         exit 0
         ;;
     r)  run=1
@@ -60,6 +61,8 @@ function cleanUpLeadingDir() {
 }
 
 function manageHyphensAndNumbering() {
+    #Random brackets around numbers?!?!
+    newfilename=$(echo "$newfilename" | sed -E "s/\(([0-9]*)\)/\1/g")
     # Hyphens
     newfilename=$(echo "$newfilename" | sed -E "s/ - /-/g")
     # http://regexpal.com/

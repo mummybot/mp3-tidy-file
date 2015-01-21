@@ -11,15 +11,15 @@ Command line options:
     -r          Rename mp3 files.
     -p          The directory path of the mp3 files to be tidied.
                 By default it will use the location of this script.
-                Should point to Genre/Artist/Album/%FILES_TO_TIDY%
+                Should point to ./Genre/Artist/Album/%FILES_TO_TIDY%
     -h          Print this help menu
 
 Examples:
     Dry run all mp3s in this directory
-        .mp3-tidy-file.sh -p Electronica/Mark\ Ronson/Uptown\ Special\
+        .mp3-tidy-file.sh -p ./Electronica/Mark\ Ronson/Uptown\ Special
 
     Tidy all mp3s in this directory
-        .mp3-tidy-file.sh -r -p Electronica/Mark\ Ronson/Uptown\ Special\
+        .mp3-tidy-file.sh -r -p ./Electronica/Mark\ Ronson/Uptown\ Special
 
 '
 run=0
@@ -37,7 +37,7 @@ while getopts "h?rp:" opt; do
         ;;
     r)  run=1
         ;;
-    p)  path=$OPTARG
+    p)  path="$OPTARG"
         ;;
     esac
 done
@@ -45,9 +45,6 @@ done
 shift $((OPTIND-1))
 
 [ "$1" = "--" ] && shift
-
-#echo "verbose=$verbose, output_file='$output_file', Leftovers: $@"
-
 
 function dirnametofilename() {
   for f in $*; do
@@ -62,6 +59,7 @@ function dirnametofilename() {
 
 function setArtistAlbumName() {
     local ary
+
     IFS='/' read -a ary <<< "${path}";
     artist=${ary[@]: -2:1}
     album=${ary[@]: -1:1}
@@ -96,25 +94,28 @@ function replaceFeat() {
 }
 
 function getmp3s() {
-    echo "Path: " $path
     while IFS= read -d $'\0' -r file ; do
-        oldfilename=$file
-        newfilename=$file
+        oldfilename=$(basename "$file")
+        newfilename="${oldfilename}"
 
         # Run the functions
         addartistname "$file"
         cleanUpLeadingDir "${newfilename}"
         replaceFeat "${newfilename}"
 
+        # Check if in dry run mode
         if [[ $run != 1 ]]; then
             printf "\"$oldfilename\" to \n\"$newfilename\"\n\n"
+        # In run mode
         else
             printf 'New file name: %s\n' "$newfilename"
         fi
     done < <(find "$path" -iname '*.mp3' -print0)
 
+    # Check if in dry run mode
     if [[ $run != 1 ]]; then
         echo "If the this looks good run command with -r switch."
+    # In run mode
     else
         echo "Renaming complete."
     fi

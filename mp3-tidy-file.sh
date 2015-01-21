@@ -95,6 +95,8 @@ function replaceFeaturing() {
     newfilename=$(echo "$newfilename" | sed "s/feat/ft/g")
     # Sentence case feat
     newfilename=$(echo "$newfilename" | sed "s/Feat/ft/g")
+    # Sentence case feat
+    newfilename=$(echo "$newfilename" | sed "s/(with/(ft /g")
     #  Remove trailing period if it exists
     newfilename=$(echo "$newfilename" | sed "s/ft./ft/g")
     #  Add trailing period as it now doesn't exist

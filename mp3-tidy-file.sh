@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 # A POSIX variable
 OPTIND=1         # Reset in case getopts has been used previously in the shell.
@@ -67,17 +67,21 @@ function setArtistAlbumName() {
 }
 
 function addartistname() {
-    newfilename="${artist} - ${1}"
+    newfilename="${artist} ${newfilename}"
 }
 
 function cleanUpLeadingDir() {
-    newfilename="${1/.\//}"
+    newfilename="${newfilename/.\//}"
+}
+
+function contractHyphens() {
+    newfilename=
 }
 
 function replaceFeat() {
     # Stupid mac regex can not be set to case insensitive
     # Commmon feat usage
-    newfilename=$(echo "$1" | sed "s/feat/ft/g")
+    newfilename=$(echo "$newfilename" | sed "s/feat/ft/g")
     # Sentence case feat
     newfilename=$(echo "$newfilename" | sed "s/Feat/ft/g")
     #  Remove trailing period if it exists
@@ -91,15 +95,15 @@ function replaceFeat() {
     fi
 }
 
-function getmp3s() {
+function getMp3sAndRunMethods() {
     while IFS= read -d $'\0' -r file ; do
         oldfilename=$(basename "$file")
         newfilename="${oldfilename}"
 
         # Run the functions
-        addartistname "$file"
-        cleanUpLeadingDir "${newfilename}"
-        replaceFeat "${newfilename}"
+        addartistname
+        cleanUpLeadingDir
+        replaceFeat
 
         # Check if in dry run mode
         if [[ $run != 1 ]]; then
@@ -120,6 +124,6 @@ function getmp3s() {
 }
 
 setArtistAlbumName
-getmp3s
+getMp3sAndRunMethods
 
 # # End of file

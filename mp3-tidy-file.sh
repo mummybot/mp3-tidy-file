@@ -25,6 +25,10 @@ run=0
 path="${PWD}"
 artist=""
 album=""
+song=""
+year=""
+track=""
+genre=""
 oldfilename=""
 newfilename=""
 
@@ -45,6 +49,9 @@ shift $((OPTIND-1))
 
 [ "$1" = "--" ] && shift
 
+# =================================================
+# Format files and folders
+# =================================================
 function setArtistAlbumName() {
     local ary
 
@@ -117,7 +124,7 @@ function cleanUpDoubles() {
     newfilename=$(echo "$newfilename" | sed -E "s/[ -]+[ -]+/ - /g")
 }
 
-function getMp3sAndRunMethods() {
+function rename files() {
     while IFS= read -d $'\0' -r file ; do
         oldfilename=$(basename "$file")
         newfilename="${oldfilename}"
@@ -150,6 +157,27 @@ function getMp3sAndRunMethods() {
 }
 
 setArtistAlbumName
-getMp3sAndRunMethods
+
+read -p "Do you want to rename files? " -n 1 -r
+echo    # (optional) move to a new line
+if [[ $REPLY =~ ^[Yy]$ ]]
+then
+    renameFiles
+fi
+
+read -p "Do you want to format id3 tags? " -n 1 -r
+echo    # (optional) move to a new line
+if [[ $REPLY =~ ^[Yy]$ ]]
+then
+    formatId3Tags
+fi
+
+
+# =================================================
+# Format id3 v1 & v2 flags
+# =================================================
+function set
+
+
 
 # # End of file

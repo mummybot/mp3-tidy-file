@@ -18,19 +18,24 @@ echo "        .mp3-tidy-file.sh -p ./Electronica/Mark\ Ronson/Uptown\ Special"
 echo ""
 echo "    Tidy all mp3s in this directory"
 echo "        .mp3-tidy-file.sh -r -p ./Electronica/Mark\ Ronson/Uptown\ Special"
-
-
+echo ""
 }
+
 run=0
 path="${PWD}"
+
 artist=""
 album=""
 song=""
 year=""
 track=""
+total=""
 genre=""
+
 oldfilename=""
 newfilename=""
+
+genres="Electronica Hip-Hop Rock Metal Classical Comdey Jazz Pop"
 
 while getopts "h?rp:" opt; do
     case "$opt" in
@@ -42,6 +47,10 @@ while getopts "h?rp:" opt; do
         ;;
     p)  path="$OPTARG"
         ;;
+    y)  year="$OPTARG"
+        ;;
+    g)  genre="$OPTARG"
+        ;;
     esac
 done
 
@@ -49,18 +58,58 @@ shift $((OPTIND-1))
 
 [ "$1" = "--" ] && shift
 
+function getAbsPath() {
+    local absPath=$(cd "$(dirname "$path")"; pwd)
+    local count=0
+    local ary
+    
+    IFS='/' read -a ary <<< "${path}";
+    for i in "${ary[@]}"
+    do
+        if [[ $i != *$absPath* ]] && [[ $i != "." ]]; then
+            absPath=$absPath"/"$i 
+        fi
+    done
+    echo $absPath
+}
+path=$(getAbsPath)
+
 # =================================================
 # Format files and folders
 # =================================================
-function setArtistAlbumName() {
+function setSharedMetaData() {
     local ary
+    local tempGenre=""
 
     IFS='/' read -a ary <<< "${path}";
+
+    echo "Path: " "${path}"
+    echo "ary length: " ${#ary[@]}
+    echo "ary: " ${ary[0]}","${ary[1]}","${ary[2]}","${ary[3]}
     artist=${ary[@]: -2:1}
     album=${ary[@]: -1:1}
 
+    echo "Path 3: " \"${ary[@]: -3:1}\"
+
+    # ./artist/album
+    # /blah/blah/genre/artist/album
+    # ../genre/artist/album
+    # ../artist/album
+
+    if [[ $genre == "" ]]; then
+        tempGenre=${ary[@]: -3:1}
+        
+        echo "tempGenre: " $tempGenre
+        echo "Set genre based on path name if it is a valid genre"
+        if [[ $tempGenre == *"$genres"* ]]; then
+            genre=$tempGenre
+        fi
+    fi
+
     echo "Artist: " $artist
     echo "Album: " $album
+    echo "Year: " $year
+    echo "Genre: " $genre
 }
 
 function cleanUpLeadingDir() {
@@ -124,7 +173,7 @@ function cleanUpDoubles() {
     newfilename=$(echo "$newfilename" | sed -E "s/[ -]+[ -]+/ - /g")
 }
 
-function rename files() {
+function renameFiles() {
     while IFS= read -d $'\0' -r file ; do
         oldfilename=$(basename "$file")
         newfilename="${oldfilename}"
@@ -156,7 +205,7 @@ function rename files() {
     fi
 }
 
-setArtistAlbumName
+setSharedMetaData
 
 read -p "Do you want to rename files? " -n 1 -r
 echo    # (optional) move to a new line
@@ -176,7 +225,9 @@ fi
 # =================================================
 # Format id3 v1 & v2 flags
 # =================================================
-function set
+function formatId3Tags () {
+
+}
 
 
 

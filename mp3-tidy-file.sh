@@ -29,7 +29,8 @@ album=""
 song=""
 year=""
 track=""
-total=""
+trackName=""
+trackTotal=""
 genre=""
 
 oldfilename=""
@@ -37,7 +38,7 @@ newfilename=""
 
 genres="Electronica Hip-Hop Rock Metal Classical Comdey Jazz Pop"
 
-while getopts "h?rp:" opt; do
+while getopts "h?r:p:y:g:" opt; do
     case "$opt" in
     h|\?)
         showHelp
@@ -62,17 +63,18 @@ function getAbsPath() {
     local absPath=$(cd "$(dirname "$path")"; pwd)
     local count=0
     local ary
-    
+
     IFS='/' read -a ary <<< "${path}";
+
     for i in "${ary[@]}"
     do
-        if [[ $i != *$absPath* ]] && [[ $i != "." ]]; then
-            absPath=$absPath"/"$i 
+        if [[ "$absPath" != *"$i"* ]] && [[ "$i" != "." ]]; then
+            absPath=$absPath"/"$i
         fi
     done
-    echo $absPath
+    path=$absPath
 }
-path=$(getAbsPath)
+getAbsPath
 
 # =================================================
 # Format files and folders
@@ -83,33 +85,31 @@ function setSharedMetaData() {
 
     IFS='/' read -a ary <<< "${path}";
 
-    echo "Path: " "${path}"
-    echo "ary length: " ${#ary[@]}
-    echo "ary: " ${ary[0]}","${ary[1]}","${ary[2]}","${ary[3]}
+    # Artist
     artist=${ary[@]: -2:1}
+    # Album
     album=${ary[@]: -1:1}
 
-    echo "Path 3: " \"${ary[@]: -3:1}\"
-
-    # ./artist/album
-    # /blah/blah/genre/artist/album
-    # ../genre/artist/album
-    # ../artist/album
-
+    # Genre
     if [[ $genre == "" ]]; then
         tempGenre=${ary[@]: -3:1}
-        
-        echo "tempGenre: " $tempGenre
-        echo "Set genre based on path name if it is a valid genre"
+
         if [[ $tempGenre == *"$genres"* ]]; then
             genre=$tempGenre
         fi
     fi
 
+    # trackTotal
+    trackTotal=$(find "$path" -name "*.mp3" | wc -l)
+
+    echo "Id3 shared MetaData"
+    echo "==================="
     echo "Artist: " $artist
     echo "Album: " $album
     echo "Year: " $year
     echo "Genre: " $genre
+    echo "trackTotal: " $trackTotal
+    echo ""
 }
 
 function cleanUpLeadingDir() {
@@ -207,12 +207,47 @@ function renameFiles() {
 
 setSharedMetaData
 
-read -p "Do you want to rename files? " -n 1 -r
-echo    # (optional) move to a new line
-if [[ $REPLY =~ ^[Yy]$ ]]
-then
-    renameFiles
-fi
+# read -p "Do you want to rename files? " -n 1 -r
+# echo    # (optional) move to a new line
+# if [[ $REPLY =~ ^[Yy]$ ]]
+# then
+#     renameFiles
+# fi
+
+
+# =================================================
+# Format id3 v1 & v2 flags
+# =================================================
+function getTrackName() {
+    trackName=$(echo "$1" | sed -E "s/.* - [0-9]* - (.*)\.mp3/\1/g")
+}
+
+function formatId3Tags () {
+    $trackNumber=0
+    while IFS= read -d $'\0' -r file ; do
+        
+        getTrackName "$(basename "$file")"
+
+        let trackNumber=trackNumber+1
+
+        # Check if in dry run mode
+        if [[ $run != 1 ]]; then
+            printf "Setting id3 v1 & v2 tags of \"$(basename "$file")\"\n"
+            printf "Artist: $artist\nAlbum: $album\nTrack Name: $trackName\nComment: ""\nDescription: ""\nYear: $year\nTrack Number: $trackNumber\nTrack Total: $trackTotal\nGenre: $genre\n\n"
+        # In run mode
+        else
+            id3tag -aSTRING $artist -ASTRING $album -sSTRING $trackName -cSTRING "" -CSTRING "" -ySTRING $year -tSTRING $trackNumber -TSTRING $trackTotal -gSHORT  $genre "$file"
+        fi
+    done < <(find "$path" -iname '*.mp3' -print0)
+
+    # Check if in dry run mode
+    if [[ $run != 1 ]]; then
+        echo "If the conversion looks good run command with -r switch."
+    # In run mode
+    else
+        echo "Tagging complete."
+    fi
+}
 
 read -p "Do you want to format id3 tags? " -n 1 -r
 echo    # (optional) move to a new line
@@ -220,15 +255,5 @@ if [[ $REPLY =~ ^[Yy]$ ]]
 then
     formatId3Tags
 fi
-
-
-# =================================================
-# Format id3 v1 & v2 flags
-# =================================================
-function formatId3Tags () {
-
-}
-
-
 
 # # End of file

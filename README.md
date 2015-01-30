@@ -6,7 +6,7 @@ Command line options:
 -r          Write changes, pass any argument.
 -p          The directory path of the mp3 files to be tidied.
             By default it will use the location of this script.
-            Should point to ./Genre/Artist/Album/%FILES_TO_TIDY%
+            Should point to ./Artist/Album/%FILES_TO_TIDY%
 -y          The ablum year
 -g          Short code genre. For full list see http://axon.cs.byu.edu/~adam/gatheredinfo/organizedtables/musicgenrelist.php.
             Recommended genres and codes:

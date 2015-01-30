@@ -102,7 +102,7 @@ function setSharedMetaData() {
     # trackTotal
     trackTotal=$(find "$path" -name "*.mp3" | wc -l)
     # Trim white space on trackTotal
-    trackTotal=$(echo " $trackTotal " | sed -E "s/^ *//" | sed -E "s/ *$//")
+    trackTotal=$(echo "$trackTotal" | sed -E "s/^ *//" | sed -E "s/ *$//")
 
     echo "Id3 shared MetaData"
     echo "==================="
@@ -236,9 +236,10 @@ function formatId3Tags () {
         if [[ $run != 1 ]]; then
             printf "Setting id3 v1 & v2 tags of \"$(basename "$file")\"\n"
             printf "Artist: $artist\nAlbum: $album\nTrack Name: $trackName\nComment: ""\nDescription: ""\nYear: $year\nTrack Number: $trackNumber\nTrack Total: $trackTotal\nGenre: $genre\n\n"
+            # echo id3tag -aSTRING "\"$artist\"" -ASTRING "\"$album\"" -sSTRING "\"$trackName\"" -cSTRING "\"\"" -CSTRING "\"\"" -ySTRING "\"$year\"" -tSTRING "\"$trackNumber\"" -TSTRING "\"$trackTotal\"" -gSHORT  "\"$genre\"" "\"$file\""
         # In run mode
         else
-            echo id3tag -aSTRING "$artist" -ASTRING "$album" -sSTRING "$trackName" -cSTRING "" -CSTRING "" -ySTRING "$year" -tSTRING "$trackNumber" -TSTRING "$trackTotal" -gSHORT  "$genre" "$file"
+            id3tag -aSTRING "\"$artist\"" -ASTRING "\"$album\"" -sSTRING "\"$trackName\"" -cSTRING "\"\"" -CSTRING "\"\"" -ySTRING "\"$year\"" -tSTRING "\"$trackNumber\"" -TSTRING "\"$trackTotal\"" -gSHORT  "\"$genre\"" "\"$file\""
         fi
     done < <(find "$path" -iname '*.mp3' -print0)
 

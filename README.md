@@ -39,7 +39,7 @@ Place the album to rename in the artist/album structure. The mp3-tidy-file eithe
 
 If in dry run mode the new file name looks incorrect, either make neccessary changes to files to make up shortfall or add additional formatting functions in script where highlighted.
 
-### ID3 tagging
+## ID3 tagging
 This uses the opens source library id3lib which once installed is accessed on the command line using id3tag.
 
 Use homebrew to install:

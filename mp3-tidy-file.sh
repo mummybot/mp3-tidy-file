@@ -25,10 +25,10 @@ echo "-h          Print this help menu"
 echo ""
 echo "Examples:"
 echo "    Dry run all mp3s in this directory"
-echo "        .mp3-tidy-file.sh -p ./Electronica/Mark\ Ronson/Uptown\ Special"
+echo "        .mp3-tidy-file.sh -p ./Mark\ Ronson/Uptown\ Special"
 echo ""
 echo "    Tidy all mp3s in this directory"
-echo "        .mp3-tidy-file.sh -r -p ./Electronica/Mark\ Ronson/Uptown\ Special"
+echo "        .mp3-tidy-file.sh -p ./Mark\ Ronson/Uptown\ Special -r 1"
 echo ""
 }
 

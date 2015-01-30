@@ -119,6 +119,7 @@ setSharedMetaData
 
 # =================================================
 # Format files and folders
+# Add new formatting functions as neccessary based on further found idiosyncracies
 # =================================================
 function cleanUpLeadingDir() {
     newfilename="${newfilename/.\//}"
@@ -186,7 +187,7 @@ function renameFiles() {
         oldfilename=$(basename "$file")
         newfilename="${oldfilename}"
 
-        # Run the functions
+        # Run the formatting functions
         cleanUpLeadingDir
         manageHyphensAndNumbering
         removeArtistName

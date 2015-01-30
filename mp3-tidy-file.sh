@@ -6,10 +6,21 @@ OPTIND=1         # Reset in case getopts has been used previously in the shell.
 # Initialise variables
 function showHelp() {
 echo "Command line options:"
-echo "-r          Rename mp3 files."
+echo "-r          Write changes, pass any argument."
 echo "-p          The directory path of the mp3 files to be tidied."
 echo "            By default it will use the location of this script."
 echo "            Should point to ./Genre/Artist/Album/%FILES_TO_TIDY%"
+echo "-y          The ablum year"
+echo "-g          Short code genre. For full list see http://axon.cs.byu.edu/~adam/gatheredinfo/organizedtables/musicgenrelist.php."
+echo "            Recommended genres and codes:"
+echo "            7     Hip-Hop"
+echo "            8     Jazz"
+echo "            9     Metal"
+echo "            13    Pop"
+echo "            17    Rock"
+echo "            32    Classical"
+echo "            52    Electronic"
+echo "            57    Comedy"
 echo "-h          Print this help menu"
 echo ""
 echo "Examples:"
@@ -36,7 +47,7 @@ genre=""
 oldfilename=""
 newfilename=""
 
-genres="Electronica Hip-Hop Rock Metal Classical Comdey Jazz Pop"
+genres="Electronica Hip-Hop Rock Metal Classical Comedy Jazz Pop"
 
 while getopts "h?r:p:y:g:" opt; do
     case "$opt" in
@@ -59,6 +70,9 @@ shift $((OPTIND-1))
 
 [ "$1" = "--" ] && shift
 
+# =================================================
+# Set up and normalise shared data
+# =================================================
 function getAbsPath() {
     local absPath=$(cd "$(dirname "$path")"; pwd)
     local count=0
@@ -76,9 +90,6 @@ function getAbsPath() {
 }
 getAbsPath
 
-# =================================================
-# Format files and folders
-# =================================================
 function setSharedMetaData() {
     local ary
     local tempGenre=""
@@ -89,15 +100,6 @@ function setSharedMetaData() {
     artist=${ary[@]: -2:1}
     # Album
     album=${ary[@]: -1:1}
-
-    # Genre
-    if [[ $genre == "" ]]; then
-        tempGenre=${ary[@]: -3:1}
-
-        if [[ $tempGenre == *"$genres"* ]]; then
-            genre=$tempGenre
-        fi
-    fi
 
     # trackTotal
     trackTotal=$(find "$path" -name "*.mp3" | wc -l)
@@ -113,7 +115,11 @@ function setSharedMetaData() {
     echo "trackTotal: "$trackTotal
     echo ""
 }
+setSharedMetaData
 
+# =================================================
+# Format files and folders
+# =================================================
 function cleanUpLeadingDir() {
     newfilename="${newfilename/.\//}"
 }
@@ -207,8 +213,6 @@ function renameFiles() {
     fi
 }
 
-setSharedMetaData
-
 # read -p "Do you want to rename files? " -n 1 -r
 # echo    # (optional) move to a new line
 # if [[ $REPLY =~ ^[Yy]$ ]]
@@ -236,10 +240,10 @@ function formatId3Tags () {
         if [[ $run != 1 ]]; then
             printf "Setting id3 v1 & v2 tags of \"$(basename "$file")\"\n"
             printf "Artist: $artist\nAlbum: $album\nTrack Name: $trackName\nComment: ""\nDescription: ""\nYear: $year\nTrack Number: $trackNumber\nTrack Total: $trackTotal\nGenre: $genre\n\n"
-            # echo id3tag -aSTRING "\"$artist\"" -ASTRING "\"$album\"" -sSTRING "\"$trackName\"" -cSTRING "\"\"" -CSTRING "\"\"" -ySTRING "\"$year\"" -tSTRING "\"$trackNumber\"" -TSTRING "\"$trackTotal\"" -gSHORT  "\"$genre\"" "\"$file\""
+            # echo id3tag -a "\"$artist\"" -A "\"$album\"" -s "\"$trackName\"" -c "\"\"" -C "\"\"" -y "\"$year\"" -t "\"$trackNumber\"" -T "\"$trackTotal\"" -gSHORT  "\"$genre\"" "\"$file\""
         # In run mode
         else
-            id3tag -aSTRING "\"$artist\"" -ASTRING "\"$album\"" -sSTRING "\"$trackName\"" -cSTRING "\"\"" -CSTRING "\"\"" -ySTRING "\"$year\"" -tSTRING "\"$trackNumber\"" -TSTRING "\"$trackTotal\"" -gSHORT  "\"$genre\"" "\"$file\""
+            id3tag -a "$artist" -A "$album" -s "$trackName" -c "" -C "" -y "$year" -t "$trackNumber" -T "$trackTotal" -g  "$genre" "$file"
         fi
     done < <(find "$path" -iname '*.mp3' -print0)
 

@@ -213,12 +213,12 @@ function renameFiles() {
     fi
 }
 
-# read -p "Do you want to rename files? " -n 1 -r
-# echo    # (optional) move to a new line
-# if [[ $REPLY =~ ^[Yy]$ ]]
-# then
-#     renameFiles
-# fi
+read -p "Do you want to rename files? " -n 1 -r
+echo    # (optional) move to a new line
+if [[ $REPLY =~ ^[Yy]$ ]]
+then
+    renameFiles
+fi
 
 
 # =================================================

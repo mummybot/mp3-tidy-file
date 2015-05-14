@@ -128,6 +128,8 @@ function cleanUpLeadingDir() {
 function manageHyphensAndNumbering() {
     #Random brackets around numbers?!?!
     newfilename=$(echo "$newfilename" | sed -E "s/\(([0-9]*)\)/\1/g")
+    # Convert special character hyphens to standard
+    newfilename=$(echo "$newfilename" | sed -E "s/–/-/g")
     # Hyphens
     newfilename=$(echo "$newfilename" | sed -E "s/ - /-/g")
     # http://regexpal.com/
@@ -165,7 +167,7 @@ function replaceFeaturing() {
     #  Remove trailing period if it exists
     newfilename=$(echo "$newfilename" | sed "s/ft./ft/g")
     #  Add trailing period as it now doesn't exist
-    newfilename=$(echo "$newfilename" | sed "s/ft/ft./g")
+    newfilename=$(echo "$newfilename" | sed "s/ ft/ ft./g")
 
     # Remove surrounding () parentheses
     if [[ $newfilename == *\(ft.*\)* ]]; then
